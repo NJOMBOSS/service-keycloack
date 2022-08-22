@@ -1,0 +1,110 @@
+    Spring Boot, Security, MySQL and keycloack REST API OAuth2
+
+
+    1. Setup keycloack Authorization Server
+      a. Télécharger keycloack (Quarkus)
+      b. Creer un Realm: springboot
+      c. Aller dans client et créer u client:
+          * clientID: fonke-app
+          * clientProtocole: openid-connect
+          * root URL: http://localhost:8083
+      d. Aller dans Role, cliquer sur Add Role
+          * Role Name: user
+          *Description: Role user
+
+       e. Aller sur users, cliquer sur Add users
+          * username: etienne
+          * email: etienne@yahoo.fr
+          * First name: TCHETCHE
+          * Last name: etienne
+
+      f. Cliquer sur users: etienne,
+          * cliquer sur role mapping
+          * cocher comme role: user
+          * cliquer sur Assign
+
+       g. Sur user aller dans l'onglet credenttials:
+          * cliquer qur set password(entre Amen)
+          * valider
+
+       h. Aller dans client et donner comme adresse:
+          * Valid redirection URLs: http://localhost:8083/*
+          * web origins: http://localhost:8083
+          * admin URL: http://localhost:8083
+
+       SE RENDRE ENSUITE SUR POSTMAN  ET CREER UN WORKSPACE:
+
+          * nom workspace: keycloak
+          * créer une requête POST qui nous permettra de générer un token avec l'adrsse suivante:
+            http://localhost:8083/realms/sprinboot/protocol/openid-connect/token
+          * ensuite cliquer sur Body
+          * cliquer sur x-www-form-urlencoded
+          * entrer les informations suivantes:
+
+          Key                           value
+          client_id                     fonke-app
+          username                      etienne
+          password                      Amen
+          grant_type                    password
+
+          * Cliquer sur send, un token sera générer
+
+    2. Step: Create Spring Boot Application
+          * Se rendre sur Spring initializ
+             . Group: com.fonke
+             . Artifact: keycloack
+             . Name: keyclaoak
+          * Les dépenddances
+             . Spring Web
+             . OAuth2 Resource Server
+             . MySQL
+             . Spring Data
+             . Lombok
+
+          * Lancer l'application et aller dans le pom.xml et ajouter:
+
+              <dependency>
+                <groupId>org.modelmapper</groupId>
+                <artifactId>modelmapper</artifactId>
+                <version>3.0.0</version>
+              </dependency>
+
+    3. Step: Configure Spring Security and OAuth2
+         * Aller sur postman et créer une requête keycloak Info la méthode GET aura l'URL suivante:
+         http://localhost:8083/realms/sprinboot/.well-known/openid-configuration
+         on aura l'url pour
+          . issuer-uri -> issuer
+          . jwks_uri -> jwt-set-uri
+
+         * Créer un package config dans IntelliJ:
+          . Créer la classe SecurityConfig
+
+    4. Step: Create Spring Data, Entity, Repository, Sercvice and RestController
+         . Créer le package Entity: Board
+         . Créer le package Repository: BoardRepository
+         . Créer le package service: BoardService, BoardServiceImpl
+         . Créer le package controller: BoardController
+         . Créer le package dto: BoardDto
+
+    5. Step: Run and Test using Postman
+      * Insert les données dans la BD
+       Insert into board (title, content, author, created_at)
+       values("New Spring Boot Articles", "Didin J.", "The new Spring Boot article in valable on fonke.com",
+       current_tirmestamp);
+
+      * Aller dans postman
+
+       . Créer endpoint Get Boards avec lien suivant:
+          http://localhost:8083/api/boards/
+       . Generer un token
+       . Ensuite sur header et remplir comme suit:
+
+          Key                           value
+          Content_Type                  applicaiton/json
+          Authorization                 Barer
+                                        (coller le token copié ici)
+
+       . Cliquer sur send s'il a l'autorisation il aura le résultat
+
+
+
